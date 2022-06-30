@@ -1,7 +1,6 @@
 const express = require("express");
 const { User } = require("../models");
-
-// const apiErrorHandler = require("../middlewares/api_error_handler");
+const { badRequest, internal } = require("../middlewares/ApiError");
 
 const router = express.Router();
 
@@ -13,8 +12,9 @@ router.post("/", async(req, res, next) => {
 
         return res.json(user);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json(err);
+        // console.log(err);
+        // return res.status(500).json(err);
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 
@@ -23,8 +23,9 @@ router.get("/", async(req, res, next) => {
         const users = await User.findAll();
         res.json(users);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Something went wrong" });
+        // console.log(err);
+        // return res.status(500).json({ error: "Something went wrong" });
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 
@@ -35,14 +36,17 @@ router.get("/:uuid", async(req, res, next) => {
         });
 
         if (user === null) {
-            return res.status(400).json({ error: "User not found" });
+            badRequest(new Error("User not found"), req, res, next);
+            return;
+            // return res.status(400).json({ error: "User not found" });
             // throw new Error("badRequest");
         }
 
         return res.json(user);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Something went wrong" });
+        // console.log(err);
+        // return res.status(500).json({ error: "Something went wrong" });
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 
@@ -53,19 +57,22 @@ router.delete("/:uuid", async(req, res, next) => {
         });
 
         if (user === null) {
-            return res.status(400).json({ error: "There is not such user" });
+            // return res.status(400).json({ error: "There is not such user" });
+            badRequest(new Error("There is no such user"), req, res, next);
+            return;
         }
 
         user.destroy();
 
         return res.json(user);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Something went wrong" });
+        // console.log(err);
+        // return res.status(500).json({ error: "Something went wrong" });
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 
-router.delete("/", async(req, res) => {
+router.delete("/", async(req, res, next) => {
     try {
         const users = await User.destroy({
             where: {},
@@ -74,12 +81,13 @@ router.delete("/", async(req, res) => {
 
         return res.json(users);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Something went wrong" });
+        // console.log(err);
+        // return res.status(500).json({ error: "Something went wrong" });
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 
-router.put("/:uuid", async(req, res) => {
+router.put("/:uuid", async(req, res, next) => {
     try {
         // let name = req.body.name ?
         //     req.body.name :
@@ -110,7 +118,9 @@ router.put("/:uuid", async(req, res) => {
         const user = await User.findOne({ where: { uuid: req.params.uuid } });
 
         if (user === null) {
-            return res.status(400).json({ error: "There is no such user" });
+            // return res.status(400).json({ error: "There is no such user" });
+            badRequest(new Error("There is no such user"), req, res, next);
+            return;
         }
 
         let name = req.body.name ? req.body.name : user.name;
@@ -125,8 +135,9 @@ router.put("/:uuid", async(req, res) => {
 
         return res.json(user);
     } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Something went wrong" });
+        // console.log(err);
+        // return res.status(500).json({ error: "Something went wrong" });
+        internal(new Error("Something went wrong"), req, res, next);
     }
 });
 

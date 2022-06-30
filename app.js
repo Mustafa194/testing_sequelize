@@ -1,6 +1,6 @@
 const express = require("express");
 const { sequelize } = require("./models");
-// const apiErrorHandler = require("./middlewares/apiErrorHandler");
+const { badRequest, internal } = require("./middlewares/ApiError");
 
 const app = express();
 
@@ -10,7 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/users", require("./routes/users"));
 
-// app.use(apiErrorHandler);
+app.use(badRequest);
+app.use(internal);
 
 app.listen({ port: 5000 }, async() => {
     // console.log("Server up on http://localhost:5000");
